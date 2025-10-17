@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background-color: #161616;
+        }
+
+        h1, h3 {
+            color: #ffffff;
+            font-weight: bolder;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }   
+
+        .lock-btn {
+            background-color: #1e1e2f;      /* dark base */
+            color: #ffffff;                 /* white text */
+            border: 3px solid #3b82f6;      /* bright blue outline */
+            padding: 20px 28px;             /* bigger padding */
+            border-radius: 10px;            /* slightly rounder corners */
+            font-size: 18px;                /* larger text */
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .lock-btn:focus {
+            outline: none;
+            border-color: #60a5fa;          /* lighter blue focus outline */
+        }
+
+        .lock-btn:active {
+            background-color: #111122;      /* darker on press */
+        }
+
+        .lock-btn.locked {
+            background-color: #3b82f6;      /* blue fill when locked */
+            color: #fff;
+        }
+
+        .strobo {
+            background-color: #ef4444;      /* red background */
+            color: #ffffff;                 /* white text */
+            border: 3px solid #b91c1c;      /* dark red outline */
+            padding: 20px 28px;             /* bigger padding */
+            border-radius: 10px;            /* slightly rounder corners */
+            font-size: 18px;                /* larger text */
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .strobo:active {
+            outline: none;
+            border-color: #ff0000; 
+            background-color: #ff0000;         /* lighter red focus outline */
+        }
+        
+    </style>
+</head>
+<body>
+    <h1>Light Preset</h1>
+    <div id="status"><h3>Status: Off</h3></div>
+    <div>
+        <button class="lock-btn">Off</button>
+        <button class="lock-btn">1</button>
+        <button class="lock-btn">2</button>
+        <button class="lock-btn">3</button>
+        <button class="lock-btn">4</button>
+        <br>
+        <button class="lock-btn">5</button>
+        <button class="lock-btn">6</button>
+        <button class="lock-btn">7</button>
+        <button class="lock-btn">8</button>
+        <button class="lock-btn">9</button>  
+        <br>
+        <button class="strobo" id="strobo-btn">Strobo</button>     
+    </div>
+
+    <script>
+        const ws = new WebSocket("ws://127.0.0.1:9001");
+        
+        ws.onopen = () => console.log("WebSocket connected");
+        ws.onmessage = (event) => console.log("Server says:", event.data);
+        ws.onclose = () => console.log("WebSocket closed");
+        
+        function sendEvent(event) {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify(event));
+                console.log("Sent:", event);
+            }
+        }
+        
+        // Preset buttons: send single number on click
+        document.querySelectorAll(".lock-btn").forEach(btn => {
+            if (btn.id === "strobo-btn") return; // skip Strobo
+        
+            btn.addEventListener("click", () => {
+                const number = btn.textContent;
+                sendEvent({ event: "preset_selected", number });
+            });
+        
+            // optional touch support
+            btn.addEventListener("touchstart", (e) => {
+                e.preventDefault();
+                const number = btn.textContent;
+                sendEvent({ event: "preset_selected", number });
+            });
+        });
+        
+        // Strobo button: keep press/release behavior
+        const stroboBtn = document.getElementById("strobo-btn");
+        let stroboPressed = false;
+        
+        stroboBtn.addEventListener("mousedown", () => { 
+            stroboPressed = true; 
+            sendEvent({ event: "strobo_hold", state: "down" }); 
+        });
+        stroboBtn.addEventListener("mouseup", () => { 
+            if (stroboPressed) { 
+                stroboPressed = false; 
+                sendEvent({ event: "strobo_hold", state: "up" }); 
+            } 
+        });
+        stroboBtn.addEventListener("mouseleave", () => { 
+            if (stroboPressed) { 
+                stroboPressed = false; 
+                sendEvent({ event: "strobo_hold", state: "up" }); 
+            } 
+        });
+        stroboBtn.addEventListener("touchstart", (e) => { 
+            e.preventDefault(); 
+            stroboPressed = true; 
+            sendEvent({ event: "strobo_hold", state: "down" }); 
+        });
+        stroboBtn.addEventListener("touchend", (e) => { 
+            e.preventDefault(); 
+            if (stroboPressed) { 
+                stroboPressed = false; 
+                sendEvent({ event: "strobo_hold", state: "up" }); 
+            } 
+        });
+        stroboBtn.addEventListener("touchcancel", (e) => { 
+            e.preventDefault(); 
+            if (stroboPressed) { 
+                stroboPressed = false; 
+                sendEvent({ event: "strobo_hold", state: "up" }); 
+            } 
+        });
+        </script>
+        
+</body>
+</html>
