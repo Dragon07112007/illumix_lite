@@ -65,12 +65,28 @@
             border-color: #ff0000; 
             background-color: #ff0000;         /* lighter red focus outline */
         }
+
+
+        .wheel-container {
+    position: relative;
+    width: 200px;
+    height: 200px;
+  }
+
+  
         
     </style>
 </head>
 <body>
     <h1>Light Preset</h1>
     <div id="status"><h3>Status: Off</h3></div>
+
+    <!-- New input fields -->
+<div style="margin-bottom: 20px;">
+    <input type="text" id="input1" placeholder="Pan" style="padding:10px; font-size:16px; margin-right:10px;">
+    <input type="text" id="input2" placeholder="Tilt" style="padding:10px; font-size:16px; margin-right:10px;">
+    <button id="send-inputs" style="padding:10px 20px; font-size:16px;">Send Inputs</button>
+</div>
     <div>
         <button class="lock-btn">Off</button>
         <button class="lock-btn">1</button>
@@ -84,80 +100,67 @@
         <button class="lock-btn">8</button>
         <button class="lock-btn">9</button>  
         <br>
-        <button class="strobo" id="strobo-btn">Strobo</button>     
-    </div>
+        <button class="strobo" id="strobo-btn">Strobo</button> 
+        
+        
 
     <script>
-        const ws = new WebSocket("ws://127.0.0.1:9001");
         
-        ws.onopen = () => console.log("WebSocket connected");
-        ws.onmessage = (event) => console.log("Server says:", event.data);
-        ws.onclose = () => console.log("WebSocket closed");
-        
-        function sendEvent(event) {
-            if (ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify(event));
-                console.log("Sent:", event);
-            }
+
+
+//
+const ws = new WebSocket("ws://127.0.0.1:9001");
+    
+    ws.onopen = () => console.log("WebSocket connected");
+    ws.onmessage = (event) => console.log("Server says:", event.data);
+    ws.onclose = () => console.log("WebSocket closed");
+    
+    function sendEvent(event) {
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify(event));
+            console.log("Sent:", event);
         }
-        
-        // Preset buttons: send single number on click
-        document.querySelectorAll(".lock-btn").forEach(btn => {
-            if (btn.id === "strobo-btn") return; // skip Strobo
-        
-            btn.addEventListener("click", () => {
-                const number = btn.textContent;
-                sendEvent({ event: "preset_selected", number });
-            });
-        
-            // optional touch support
-            btn.addEventListener("touchstart", (e) => {
-                e.preventDefault();
-                const number = btn.textContent;
-                sendEvent({ event: "preset_selected", number });
-            });
+    }
+
+    // Preset buttons
+    document.querySelectorAll(".lock-btn").forEach(btn => {
+        if (btn.id === "strobo-btn") return; // skip Strobo
+    
+        btn.addEventListener("click", () => {
+            const number = btn.textContent;
+            sendEvent({ event: "preset_selected", number });
         });
-        
-        // Strobo button: keep press/release behavior
-        const stroboBtn = document.getElementById("strobo-btn");
-        let stroboPressed = false;
-        
-        stroboBtn.addEventListener("mousedown", () => { 
-            stroboPressed = true; 
-            sendEvent({ event: "strobo_hold", state: "down" }); 
+    
+        btn.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            const number = btn.textContent;
+            sendEvent({ event: "preset_selected", number });
         });
-        stroboBtn.addEventListener("mouseup", () => { 
-            if (stroboPressed) { 
-                stroboPressed = false; 
-                sendEvent({ event: "strobo_hold", state: "up" }); 
-            } 
-        });
-        stroboBtn.addEventListener("mouseleave", () => { 
-            if (stroboPressed) { 
-                stroboPressed = false; 
-                sendEvent({ event: "strobo_hold", state: "up" }); 
-            } 
-        });
-        stroboBtn.addEventListener("touchstart", (e) => { 
-            e.preventDefault(); 
-            stroboPressed = true; 
-            sendEvent({ event: "strobo_hold", state: "down" }); 
-        });
-        stroboBtn.addEventListener("touchend", (e) => { 
-            e.preventDefault(); 
-            if (stroboPressed) { 
-                stroboPressed = false; 
-                sendEvent({ event: "strobo_hold", state: "up" }); 
-            } 
-        });
-        stroboBtn.addEventListener("touchcancel", (e) => { 
-            e.preventDefault(); 
-            if (stroboPressed) { 
-                stroboPressed = false; 
-                sendEvent({ event: "strobo_hold", state: "up" }); 
-            } 
-        });
-        </script>
+    });
+
+    // Strobo button
+    const stroboBtn = document.getElementById("strobo-btn");
+    let stroboPressed = false;
+
+    function handleStrobo(state) {
+        sendEvent({ event: "strobo_hold", state });
+    }
+
+    stroboBtn.addEventListener("mousedown", () => { stroboPressed = true; handleStrobo("down"); });
+    stroboBtn.addEventListener("mouseup", () => { if(stroboPressed){ stroboPressed=false; handleStrobo("up"); }});
+    stroboBtn.addEventListener("mouseleave", () => { if(stroboPressed){ stroboPressed=false; handleStrobo("up"); }});
+    stroboBtn.addEventListener("touchstart", (e) => { e.preventDefault(); stroboPressed=true; handleStrobo("down"); });
+    stroboBtn.addEventListener("touchend", (e) => { e.preventDefault(); if(stroboPressed){ stroboPressed=false; handleStrobo("up"); }});
+    stroboBtn.addEventListener("touchcancel", (e) => { e.preventDefault(); if(stroboPressed){ stroboPressed=false; handleStrobo("up"); }});
+
+    // Send input fields
+    const sendInputsBtn = document.getElementById("send-inputs");
+    sendInputsBtn.addEventListener("click", () => {
+        const input1 = document.getElementById("input1").value;
+        const input2 = document.getElementById("input2").value;
+        sendEvent({ event: "input_values", input1, input2 });
+    });
+    </script>
         
 </body>
 </html>
