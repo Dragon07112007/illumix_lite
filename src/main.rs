@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::{sync::{Arc, Mutex}, time};
 
 use tokio::net::TcpListener;
 
@@ -13,6 +13,7 @@ mod artnet;
 #[path = "fixture_lib/lib.rs"]
 mod lib;
 mod patching;
+mod present;
 
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
@@ -36,16 +37,28 @@ enum IncomingEvent {
 async fn main() {
     let universe = Arc::new(Mutex::new(get_universe()));
     artnet::launch_artnet_send_thread(universe.clone());
+    present::launch_present_thread(universe.clone(), time::Duration::from_millis(100));
+
+    universe.lock().unwrap().insert_present(present::GradientPresent {
+        speed: 0.5,
+        colors: vec![
+            [255, 0, 0],
+            [0, 255, 0],
+            [0, 0, 255],
+            [255, 255, 0],
+            [0, 255, 255],
+            [255, 0, 255],
+        ],
+        position: 0.0,
+    });
+
     let universe_filter = warp::any().map(move || universe.clone());
 
-    
-
-    let ws_route = warp::path("ws")
-        .and(warp::ws())
-        .and(universe_filter)
-        .map(|ws: warp::ws::Ws, universe: Arc<Mutex<lib::universe::Universe>>| ws.on_upgrade(move |socket| {
-            handle_websocket(socket, universe.clone())
-        }));
+    let ws_route = warp::path("ws").and(warp::ws()).and(universe_filter).map(
+        |ws: warp::ws::Ws, universe: Arc<Mutex<lib::universe::Universe>>| {
+            ws.on_upgrade(move |socket| handle_websocket(socket, universe.clone()))
+        },
+    );
 
     let static_files = warp::fs::dir("static/");
 
@@ -68,18 +81,30 @@ async fn handle_websocket(ws: warp::ws::WebSocket, universe: Arc<Mutex<lib::univ
                             IncomingEvent::Strobo { state, .. } => {
                                 if state == "down" {
                                     println!("💡 Strobo PRESSED");
-                                    universe.lock().unwrap().get_fixture_by_id_mut(1).map(|fixture| {
-                                        if let Some(FixtureComponent::Dimmer(dimmer)) = fixture.components.iter_mut().find(|comp| matches!(comp, FixtureComponent::Dimmer(_))) {
-                                            dimmer.intensity = 255;
-                                        }
-                                    });
+                                    universe.lock().unwrap().get_fixture_by_id_mut(1).map(
+                                        |fixture| {
+                                            if let Some(FixtureComponent::Dimmer(dimmer)) =
+                                                fixture.components.iter_mut().find(|comp| {
+                                                    matches!(comp, FixtureComponent::Dimmer(_))
+                                                })
+                                            {
+                                                dimmer.intensity = 255;
+                                            }
+                                        },
+                                    );
                                 } else {
                                     println!("💡 Strobo RELEASED");
-                                    universe.lock().unwrap().get_fixture_by_id_mut(1).map(|fixture| {
-                                        if let Some(FixtureComponent::Dimmer(dimmer)) = fixture.components.iter_mut().find(|comp| matches!(comp, FixtureComponent::Dimmer(_))) {
-                                            dimmer.intensity = 0;
-                                        }
-                                    });
+                                    universe.lock().unwrap().get_fixture_by_id_mut(1).map(
+                                        |fixture| {
+                                            if let Some(FixtureComponent::Dimmer(dimmer)) =
+                                                fixture.components.iter_mut().find(|comp| {
+                                                    matches!(comp, FixtureComponent::Dimmer(_))
+                                                })
+                                            {
+                                                dimmer.intensity = 0;
+                                            }
+                                        },
+                                    );
                                 }
                             }
                             IncomingEvent::Preset { number, .. } => {

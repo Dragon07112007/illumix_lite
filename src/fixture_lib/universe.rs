@@ -2,15 +2,16 @@ use serde::{Deserialize, Serialize};
 
 use crate::lib::fixture::Fixture;
 
-#[derive(Debug, Clone)]
 pub struct Universe {
     pub fixtures: Vec<Fixture>,
+    pub presents: Vec<Box<dyn crate::present::Present + Send>>,
 }
 
 impl Universe {
     pub fn new() -> Universe {
         Universe {
             fixtures: Vec::new(),
+            presents: Vec::new(),
         }
     }
 
@@ -46,5 +47,27 @@ impl Universe {
 
     pub fn add_fixture(&mut self, fixture: Fixture) {
         self.fixtures.push(fixture);
+    }
+
+    pub fn insert_present<P: crate::present::Present + Send + 'static>(&mut self, present: P) {
+        self.presents.push(Box::new(present));
+    }
+}
+
+impl std::fmt::Debug for Universe {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Universe")
+            .field("fixtures", &self.fixtures)
+            .field("presents_len", &self.presents.len())
+            .finish()
+    }
+}
+
+impl Clone for Universe {
+    fn clone(&self) -> Self {
+        Universe {
+            fixtures: self.fixtures.clone(),
+            presents: Vec::new(),
+        }
     }
 }

@@ -1,4 +1,8 @@
-use std::{net::UdpSocket, sync::{Arc, Mutex}, thread};
+use std::{
+    net::UdpSocket,
+    sync::{Arc, Mutex},
+    thread,
+};
 
 use artnet_protocol::{ArtCommand, Output};
 
@@ -25,5 +29,3 @@ pub fn launch_artnet_send_thread(universe: Arc<Mutex<Universe>>) {
         }
     });
 }
-
-

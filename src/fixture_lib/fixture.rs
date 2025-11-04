@@ -37,6 +37,8 @@ pub enum FixtureComponent {
     Placeholder,
     ColorWheel(ColorWheel),
     CustomValue(CustomValue),
+    Max,
+    Zero,
 }
 
 impl FixtureComponent {
@@ -63,6 +65,12 @@ impl FixtureComponent {
             }
             FixtureComponent::CustomValue(c) => {
                 vec![c.value]
+            }
+            FixtureComponent::Max => {
+                vec![255]
+            }
+            FixtureComponent::Zero => {
+                vec![0]
             }
         }
     }
