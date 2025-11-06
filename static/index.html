@@ -91,6 +91,10 @@
             background-color: #ff0000;         /* lighter red focus outline */
         }
 
+        .white{
+            color: #ffffff;
+        }
+
 
         .wheel-container {
     position: relative;
@@ -107,21 +111,33 @@
     <div><h3>Status: <label id="status"></label></h3></div>
 
     <!-- New input fields -->
-<div style="margin-bottom: 20px;">
-    <input type="text" id="input1" placeholder="Pan" style="padding:10px; font-size:16px; margin-right:10px;">
-    <input type="text" id="input2" placeholder="Tilt" style="padding:10px; font-size:16px; margin-right:10px;">
-    <button id="send-inputs" style="padding:10px 20px; font-size:16px;">Send Inputs</button>
-</div>
-<div>
-    <label for="volume">Pan:</label>
-    <input type="range" id="pan-slider" min="0" max="65535" value="32500">
-    <span id="pan-output">50</span>
-</div>
-<div>
-    <label for="volume">Pan:</label>
-    <input type="range" id="tilt-slider" min="0" max="65535" value="32500">
-    <span id="tilt-output">50</span>
-</div>
+    <div style="margin-bottom: 20px;">
+        <input type="text" id="input1" placeholder="Pan" style="padding:10px; font-size:16px; margin-right:10px;">
+        <input type="text" id="input2" placeholder="Tilt" style="padding:10px; font-size:16px; margin-right:10px;">
+        <button id="send-inputs" style="padding:10px 20px; font-size:16px;">Send Inputs</button>
+    </div>
+    <div class="white">
+        <label for="volume">Pan 1:</label>
+        <input type="range" id="pan-slider-1" min="0" max="65535" value="32500">
+        <span id="pan-output-1">50</span>
+    </div>
+    <div class="white">
+        <label for="volume">Tilt 1:</label>
+        <input type="range" id="tilt-slider-1" min="0" max="65535" value="32500">
+        <span id="tilt-output-1">50</span>
+    </div>
+    <br>
+    <div class="white">
+        <label for="volume">Pan 2:</label>
+        <input type="range" id="pan-slider-2" min="0" max="65535" value="32500">
+        <span id="pan-output-2">50</span>
+    </div>
+    <div class="white">
+        <label for="volume">Tilt 2:</label>
+        <input type="range" id="tilt-slider-2" min="0" max="65535" value="32500">
+        <span id="tilt-output-2">50</span>
+    </div>
+
 
     <div>
         
@@ -155,10 +171,15 @@ const offset_button = document.getElementById('offset-button');
 let offset = false;
 
 //Pan-Tilt Inputs
-const pan_slider = document.getElementById('pan-slider');
-const pan_output = document.getElementById('pan-output');
-const tilt_slider = document.getElementById('tilt-slider');
-const tilt_output = document.getElementById('tilt-output');
+const pan_slider_1 = document.getElementById('pan-slider-1');
+const pan_output_1 = document.getElementById('pan-output-1');
+const tilt_slider_1 = document.getElementById('tilt-slider-1');
+const tilt_output_1 = document.getElementById('tilt-output-1');
+
+const pan_slider_2 = document.getElementById('pan-slider-2');
+const pan_output_2 = document.getElementById('pan-output-2');
+const tilt_slider_2 = document.getElementById('tilt-slider-2');
+const tilt_output_2 = document.getElementById('tilt-output-2');
 
 
 
@@ -236,13 +257,22 @@ function addCurrentTime() {
         }
     });
 
-    pan_slider.addEventListener('input', function() {
-        pan_output.textContent = pan_slider.value;
-        sendEvent({ event: "pan", pan: parseInt(pan_slider.value) });
+    pan_slider_1.addEventListener('input', function() {
+        pan_output_1.textContent = pan_slider_1.value;
+        sendEvent({ event: "pan-1", pan_1: parseInt(pan_slider_1.value) });
     });
-    tilt_slider.addEventListener('input', function() {
-        tilt_output.textContent = tilt_slider.value;
-        sendEvent({ event: "tilt", tilt: parseInt(tilt_slider.value) });
+    tilt_slider_1.addEventListener('input', function() {
+        tilt_output_1.textContent = tilt_slider_1.value;
+        sendEvent({ event: "tilt-1", tilt_1: parseInt(tilt_slider_1.value) });
+    });
+
+    pan_slider_2.addEventListener('input', function() {
+        pan_output_2.textContent = pan_slider_2.value;
+        sendEvent({ event: "pan-2", pan_2: parseInt(pan_slider_2.value) });
+    });
+    tilt_slider_2.addEventListener('input', function() {
+        tilt_output_2.textContent = tilt_slider_2.value;
+        sendEvent({ event: "tilt-2", tilt_2: parseInt(tilt_slider_2.value) });
     });
 
     smooth_button.addEventListener('click', () => {
