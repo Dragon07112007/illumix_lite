@@ -33,8 +33,9 @@ enum IncomingEvent {
         input1: String,
         input2: String,
     }, // <-- new variant
-    ColorSelected{
-        value: String,
+    Color {
+        event: String,
+        color: String,
     }
 }
 
@@ -115,14 +116,14 @@ async fn handle_text_message(
         IncomingEvent::InputValues { input1, input2, .. } => {
             println!("📝 Inputs received: input1='{}', input2='{}'", input1, input2);
         }
-        IncomingEvent::ColorSelected { value } => {
-            match hex_to_rgb(&value) {
+        IncomingEvent::Color { color, .. } => {
+            match hex_to_rgb(&color) {
                 Ok((r, g, b)) => {
-                    println!("🎨 Color selected: {} -> RGB({}, {}, {})", value, r, g, b);
+                    println!("🎨 Color selected: {} -> RGB({}, {}, {})", color, r, g, b);
                     
                 }
                 Err(e) => {
-                    eprintln!("Invalid color format '{}': {}", value, e);
+                    eprintln!("Invalid color format '{}': {}", color, e);
                 }
             }
         }
