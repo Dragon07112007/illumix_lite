@@ -3,6 +3,7 @@ use std::{
     time,
 };
 
+
 use futures::{SinkExt, StreamExt};
 use serde::Deserialize;
 
@@ -36,7 +37,36 @@ enum IncomingEvent {
     Color {
         event: String,
         color: String,
-    }
+    },
+    Smooth {
+        event: String,
+        smooth: bool,
+    },
+    Offset{
+        event: String,
+        offset: bool,
+    },
+    Bpm{
+        event: String,
+        bpm: u32,
+    },
+    Pan1 {
+        event: String,
+        pan_1: u16,
+    },
+    Tilt1 {
+        event: String,
+        tilt_1: u16,
+    },
+    Pan2 {
+        event: String,
+        pan_2: u16,
+    },
+    Tilt2 {
+        event: String,
+        tilt_2: u16,
+    },
+
 }
 
 #[tokio::main]
@@ -46,21 +76,16 @@ async fn main() {
     //dmx::launch_dmx_send_thread(universe.clone());
     effect::launch_present_thread(universe.clone(), time::Duration::from_millis(100));
 
+    // Add a color swap effect for the PAR fixtures at 480 BPM (8 changes per second)
     universe
         .lock()
         .unwrap()
-        .insert_present(effect::GradientEffect {
-            speed: 0.5,
-            colors: vec![
-                [255, 0, 0],
-                [0, 255, 0],
-                [0, 0, 255],
-                [255, 255, 0],
-                [0, 255, 255],
-                [255, 0, 255],
-            ],
-            position: 0.0,
-        });
+        .insert_present(effect::ColorSwapEffect::new(
+            40.0,  // 120 BPM (2 beats per second)
+            7,      // 7 fixtures
+            true,   // Enable offset pattern - different starting colors
+            false,  // Disable smooth transitions for testing
+        ));
 
     let universe_filter = warp::any().map(move || universe.clone());
 
@@ -127,6 +152,62 @@ async fn handle_text_message(
                 }
             }
         }
+        IncomingEvent::Smooth { smooth, .. } => {
+            println!("🔄 Smooth toggle: {}", smooth);
+            universe.lock().unwrap().effects.iter_mut().for_each(|present| {
+                if let Some(color_swap) = present.as_mut().as_any_mut().downcast_mut::<effect::ColorSwapEffect>() {
+                    color_swap.smooth = smooth;
+                }
+            });
+        }
+        IncomingEvent::Offset { offset, .. } => {
+            println!("🔀 Offset toggle: {}", offset);
+            universe.lock().unwrap().effects.iter_mut().for_each(|present| {
+                if let Some(color_swap) = present.as_mut().as_any_mut().downcast_mut::<effect::ColorSwapEffect>() {
+                    color_swap.set_offset_pattern(offset);
+                }
+            });
+        }
+        IncomingEvent::Bpm { bpm, .. } => {
+            println!("⏱️ BPM set to: {}", bpm);
+            universe.lock().unwrap().effects.iter_mut().for_each(|present| {
+                if let Some(color_swap) = present.as_mut().as_any_mut().downcast_mut::<effect::ColorSwapEffect>() {
+                    color_swap.bpm = bpm as f32;
+                }
+            });
+        }
+        IncomingEvent::Pan1 { pan_1, .. } => {
+            println!("↔️ Pan 1 set to: {}", pan_1);
+            universe.lock().unwrap().get_fixture_by_id_mut(8).unwrap().components.iter_mut().for_each(|component| {
+                if let FixtureComponent::Position(pos) = component {
+                    pos.pan = pan_1;
+                }
+            });
+        }
+        IncomingEvent::Tilt1 { tilt_1, .. } => {
+            println!("↕️ Tilt 1 set to: {}", tilt_1);
+            universe.lock().unwrap().get_fixture_by_id_mut(8).unwrap().components.iter_mut().for_each(|component| {
+                if let FixtureComponent::Position(pos) = component {
+                    pos.tilt = tilt_1;
+                }
+            });
+        }
+        IncomingEvent::Pan2 { pan_2, .. } => {
+            println!("↔️ Pan 2 set to: {}", pan_2);
+            universe.lock().unwrap().get_fixture_by_id_mut(9).unwrap().components.iter_mut().for_each(|component| {
+                if let FixtureComponent::Position(pos) = component {
+                    pos.pan = pan_2;
+                }
+            });
+        }
+        IncomingEvent::Tilt2 { tilt_2, .. } => {
+            println!("↕️ Tilt 2 set to: {}", tilt_2);
+            universe.lock().unwrap().get_fixture_by_id_mut(9).unwrap().components.iter_mut().for_each(|component| {
+                if let FixtureComponent::Position(pos) = component {
+                    pos.tilt = tilt_2;
+                }
+            });
+        }
     }
 
     // Echo back to client
@@ -143,17 +224,15 @@ fn handle_strobo(state: String, universe: &Arc<Mutex<lib::universe::Universe>>) 
         0
     };
 
-    if let Ok(mut universe) = universe.lock() {
-        if let Some(fixture) = universe.get_fixture_by_id_mut(1) {
-            if let Some(FixtureComponent::Dimmer(dimmer)) = fixture
-                .components
-                .iter_mut()
-                .find(|comp| matches!(comp, FixtureComponent::Dimmer(_)))
-            {
-                dimmer.intensity = intensity;
+    universe.lock().unwrap().fixtures.iter_mut().for_each(|fixture| {
+        for component in fixture.components.iter_mut() {
+            if let FixtureComponent::CustomValue(cv) = component {
+                if cv.name == "strobe" {
+                    cv.value = intensity;
+                }
             }
         }
-    }
+    });
 }
 
 fn degree_to_16_bit(degree: u32, range: u32) -> u32 {

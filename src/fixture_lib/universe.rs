@@ -4,14 +4,14 @@ use crate::lib::fixture::Fixture;
 
 pub struct Universe {
     pub fixtures: Vec<Fixture>,
-    pub presents: Vec<Box<dyn crate::effect::Effect + Send>>,
+    pub effects: Vec<Box<dyn crate::effect::Effect + Send>>,
 }
 
 impl Universe {
     pub fn new() -> Universe {
         Universe {
             fixtures: Vec::new(),
-            presents: Vec::new(),
+            effects: Vec::new(),
         }
     }
 
@@ -41,7 +41,7 @@ impl Universe {
                 ..(fixture.dmx_address as usize - 1 + fixture_values.len())]
                 .copy_from_slice(&fixture_values);
         }
-
+        //println!("DMX Values: {:?}", &dmx_values[300..310]);
         return dmx_values;
     }
 
@@ -50,7 +50,7 @@ impl Universe {
     }
 
     pub fn insert_present<P: crate::effect::Effect + Send + 'static>(&mut self, present: P) {
-        self.presents.push(Box::new(present));
+        self.effects.push(Box::new(present));
     }
 }
 
@@ -58,7 +58,7 @@ impl std::fmt::Debug for Universe {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Universe")
             .field("fixtures", &self.fixtures)
-            .field("presents_len", &self.presents.len())
+            .field("presents_len", &self.effects.len())
             .finish()
     }
 }
@@ -67,7 +67,7 @@ impl Clone for Universe {
     fn clone(&self) -> Self {
         Universe {
             fixtures: self.fixtures.clone(),
-            presents: Vec::new(),
+            effects: Vec::new(),
         }
     }
 }
