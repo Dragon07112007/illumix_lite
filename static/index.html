@@ -97,20 +97,78 @@
 
 
         .wheel-container {
-    position: relative;
-    width: 200px;
-    height: 200px;
-  }
+        position: relative;
+        width: 200px;
+        height: 200px;
+    }
+
+    /* Style the slider container */
+    .slider-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px;
+    }
+
+    /* Style the slider */
+    #custom-slider {
+        -webkit-appearance: none; /* Remove default styling */
+        width: 300px; /* Adjust width */
+        height: 20px; /* Make it larger */
+        background: #333; /* Match button background */
+        border: 2px solid #fff; /* Add border to match button */
+        border-radius: 10px; /* Rounded edges */
+        outline: none; /* Remove focus outline */
+        cursor: pointer; /* Pointer cursor */
+    }
+
+    /* Style the slider thumb */
+    #custom-slider::-webkit-slider-thumb {
+        -webkit-appearance: none; /* Remove default styling */
+        width: 30px; /* Larger thumb for finer control */
+        height: 30px;
+        background: #ff0000; /* Match button active color */
+        border-radius: 50%; /* Circular thumb */
+        border: 2px solid #fff; /* Add border */
+        cursor: pointer; /* Pointer cursor */
+    }
+
+    #custom-slider::-moz-range-thumb {
+        width: 30px;
+        height: 30px;
+        background: #ff0000;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        cursor: pointer;
+    }
+
+    /* Add hover effect for the slider thumb */
+    #custom-slider:hover::-webkit-slider-thumb {
+        background: #ff5555; /* Slightly lighter red on hover */
+    }
 
   
         
     </style>
 </head>
 <body>
-    <h1>Light Preset</h1>
-    <div><h3>Status: <label id="status"></label></h3></div>
+    <h1>Light Management</h1>
 
+    <div>
+        
+        <br>
+        <button class="strobo" id="strobo-btn">Strobo</button> 
+        
+    </div>
+    <br>
+    <button class="tab-btn" id="smooth-button">Smooth</button>
+    <button class="tab-btn" id="offset-button">Offset</button>
+    <br>
+    <button class="tab-btn" id="bpm-button">TAP</button>
+    <br>
     <!-- New input fields -->
+
+    <button class="tab-btn" id="send-mv">Send</button>
 
     <div class="white">
         <label for="volume">Pan 1:</label><br>
@@ -135,7 +193,7 @@
     </div>
 
     <br>
-    <button class="tab-btn" id="send-mv">Send</button>
+    
 
     <div class="white">
         <label for="volume">Color 1</label><br>
@@ -164,20 +222,21 @@
         <label for="volume">Dimmer 2</label><br>
         <input type="range" id="dimmer-slider-2" min="0" max="255" value="0">
     </div>
+
+    <br>
+    <div class="white">
+        <label for="volume">Gobu 1</label><br>
+        <input type="range" id="gobu-slider-1" min="0" max="255" value="0">
+    </div>
+    <div class="white">
+        <label for="volume">Gobu 2</label><br>
+        <input type="range" id="gobu-slider-2" min="0" max="255" value="0">
+    </div>
+    
     
 
 
-    <div>
-        
-        <br>
-        <button class="strobo" id="strobo-btn">Strobo</button> 
-        
-    </div>
-    <br>
-    <button class="tab-btn" id="smooth-button">Smooth</button>
-    <button class="tab-btn" id="offset-button">Offset</button>
-    <br>
-    <button class="tab-btn" id="bpm-button">TAP</button>
+    
 <script>
         
 
@@ -220,8 +279,13 @@ const color_slider_2 = document.getElementById('color-slider-2');
 const focus_slider_1 = document.getElementById('focus-slider-1');
 const focus_slider_2 = document.getElementById('focus-slider-2');
 
+//Dimmer Slider
 const dimmer_slider_1 = document.getElementById('dimmer-slider-1');
 const dimmer_slider_2 = document.getElementById('dimmer-slider-2');
+
+//Gobu Slider
+const gobu_slider_1 = document.getElementById('gobu-slider-1');
+const gobu_slider_2 = document.getElementById('gobu-slider-2');
 
 const timeArray = [];
 const MAX_SIZE = 4;
@@ -379,6 +443,13 @@ function addCurrentTime() {
     });
     dimmer_slider_2.addEventListener('input', () => {
         sendEvent({ event: "dimmer-2", dimmer_2: parseInt(dimmer_slider_2.value)});
+    });
+
+    gobu_slider_1.addEventListener('input', () => {
+        sendEvent({ event: "gobu-1", gobu_1: parseInt(gobu_slider_1.value)});
+    });
+    gobu_slider_2.addEventListener('input', () => {
+        sendEvent({ event: "gobu-2", gobu_2: parseInt(gobu_slider_2.value)});
     });
 
 
