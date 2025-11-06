@@ -112,18 +112,19 @@
     <input type="text" id="input2" placeholder="Tilt" style="padding:10px; font-size:16px; margin-right:10px;">
     <button id="send-inputs" style="padding:10px 20px; font-size:16px;">Send Inputs</button>
 </div>
+<div>
+    <label for="volume">Pan:</label>
+    <input type="range" id="pan-slider" min="0" max="65535" value="32500">
+    <span id="pan-output">50</span>
+</div>
+<div>
+    <label for="volume">Pan:</label>
+    <input type="range" id="tilt-slider" min="0" max="65535" value="32500">
+    <span id="tilt-output">50</span>
+</div>
+
     <div>
-        <button class="lock-btn">Off</button>
-        <button class="lock-btn">1</button>
-        <button class="lock-btn">2</button>
-        <button class="lock-btn">3</button>
-        <button class="lock-btn">4</button>
-        <br>
-        <button class="lock-btn">5</button>
-        <button class="lock-btn">6</button>
-        <button class="lock-btn">7</button>
-        <button class="lock-btn">8</button>
-        <button class="lock-btn">9</button>  
+        
         <br>
         <button class="strobo" id="strobo-btn">Strobo</button> 
         
@@ -152,6 +153,13 @@ let smoothness = false;
 //Offset Button
 const offset_button = document.getElementById('offset-button');
 let offset = false;
+
+//Pan-Tilt Inputs
+const pan_slider = document.getElementById('pan-slider');
+const pan_output = document.getElementById('pan-output');
+const tilt_slider = document.getElementById('tilt-slider');
+const tilt_output = document.getElementById('tilt-output');
+
 
 
 const timeArray = [];
@@ -185,7 +193,7 @@ function addCurrentTime() {
     }
 
     // Preset buttons
-    document.querySelectorAll(".lock-btn").forEach(btn => {
+    /* document.querySelectorAll(".lock-btn").forEach(btn => {
         if (btn.id === "strobo-btn") return; // skip Strobo
     
         btn.addEventListener("click", () => {
@@ -200,7 +208,7 @@ function addCurrentTime() {
             const number = btn.textContent;
             sendEvent({ event: "preset_selected", number });
         });
-    });
+    }); */
 
     /*button.addEventListener('click', () => {
         // Hier kannst du den Code einfügen, der ausgeführt werden soll, wenn der Button geklickt wird
@@ -226,6 +234,15 @@ function addCurrentTime() {
             sendEvent({ event: "bpm", bpm: bpm });
             console.log('Average time between steps (in ms):', bpm);
         }
+    });
+
+    pan_slider.addEventListener('input', function() {
+        pan_output.textContent = pan_slider.value;
+        sendEvent({ event: "pan", pan: parseInt(pan_slider.value) });
+    });
+    tilt_slider.addEventListener('input', function() {
+        tilt_output.textContent = tilt_slider.value;
+        sendEvent({ event: "tilt", tilt: parseInt(tilt_slider.value) });
     });
 
     smooth_button.addEventListener('click', () => {
