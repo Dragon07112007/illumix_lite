@@ -13,7 +13,7 @@ mod artnet;
 #[path = "fixture_lib/lib.rs"]
 mod lib;
 mod patching;
-mod present;
+mod effect;
 
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
@@ -37,9 +37,9 @@ enum IncomingEvent {
 async fn main() {
     let universe = Arc::new(Mutex::new(get_universe()));
     artnet::launch_artnet_send_thread(universe.clone());
-    present::launch_present_thread(universe.clone(), time::Duration::from_millis(100));
+    effect::launch_present_thread(universe.clone(), time::Duration::from_millis(100));
 
-    universe.lock().unwrap().insert_present(present::GradientPresent {
+    universe.lock().unwrap().insert_present(effect::GradientEffect {
         speed: 0.5,
         colors: vec![
             [255, 0, 0],

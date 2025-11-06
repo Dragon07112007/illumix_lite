@@ -1,18 +1,18 @@
 use std::time;
 use std::sync::{Arc, Mutex};
 
-pub trait Present {
+pub trait Effect {
     /// Advance the present by `time_delta` and apply any changes to `universe`.
     fn tick(&mut self, time_delta: time::Duration, universe: &mut crate::lib::universe::Universe);
 }
 
-pub struct GradientPresent {
+pub struct GradientEffect {
     pub speed: f32,
     pub colors: Vec<[u8; 3]>,
     pub position: f32,
 }
 
-impl Present for GradientPresent {
+impl Effect for GradientEffect {
     fn tick(&mut self, time_delta: time::Duration, universe: &mut crate::lib::universe::Universe) {
         // advance the internal position
         let delta_seconds = time_delta.as_secs_f32();

@@ -4,7 +4,7 @@ use crate::lib::fixture::Fixture;
 
 pub struct Universe {
     pub fixtures: Vec<Fixture>,
-    pub presents: Vec<Box<dyn crate::present::Present + Send>>,
+    pub presents: Vec<Box<dyn crate::effect::Effect + Send>>,
 }
 
 impl Universe {
@@ -49,7 +49,7 @@ impl Universe {
         self.fixtures.push(fixture);
     }
 
-    pub fn insert_present<P: crate::present::Present + Send + 'static>(&mut self, present: P) {
+    pub fn insert_present<P: crate::effect::Effect + Send + 'static>(&mut self, present: P) {
         self.presents.push(Box::new(present));
     }
 }
