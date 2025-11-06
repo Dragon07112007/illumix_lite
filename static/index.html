@@ -190,7 +190,7 @@ function addCurrentTime() {
         const bpm = Math.round(60000 / averageTime);
         
         if (!isNaN(bpm)) {
-            sendEvent({ event: "bpm_tap", bpm });
+            sendEvent({ event: "bpm", bpm: bpm });
             console.log('Average time between steps (in ms):', bpm);
         }
     });
