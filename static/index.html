@@ -232,12 +232,23 @@ function addCurrentTime() {
         smoothness = !smoothness;
         //alert("Smoothness set to: " + smoothness);
         sendEvent({ event: "smooth_toggle", smooth: smoothness});
+        if (smoothness){
+            smooth_button.style.color = "#ff0000";
+        }else{
+            smooth_button.style.color = "#ffffff";
+        }
+        
     });
 
     offset_button.addEventListener('click', () => {
         offset = !offset;
         //alert("Offset set to: " + offset);
         sendEvent({ event: "offset_toggle", offset: offset});
+        if (offset){
+            offset_button.style.color = "#ff0000";
+        }else{
+            offset_button.style.color = "#ffffff";
+        }
     });
 
     // Strobo button
