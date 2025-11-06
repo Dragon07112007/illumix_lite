@@ -119,23 +119,23 @@
     <div class="white">
         <label for="volume">Pan 1:</label>
         <input type="range" id="pan-slider-1" min="0" max="65535" value="32500">
-        <span id="pan-output-1">50</span>
+        <input type="number" id="pan-number-1" min="0" max="65535" value="32500">
     </div>
     <div class="white">
         <label for="volume">Tilt 1:</label>
         <input type="range" id="tilt-slider-1" min="0" max="65535" value="32500">
-        <span id="tilt-output-1">50</span>
+        <input type="number" id="tilt-number-1" min="0" max="65535" value="32500">
     </div>
     <br>
     <div class="white">
         <label for="volume">Pan 2:</label>
         <input type="range" id="pan-slider-2" min="0" max="65535" value="32500">
-        <span id="pan-output-2">50</span>
+        <input type="number" id="pan-number-2" min="0" max="65535" value="32500">
     </div>
     <div class="white">
         <label for="volume">Tilt 2:</label>
         <input type="range" id="tilt-slider-2" min="0" max="65535" value="32500">
-        <span id="tilt-output-2">50</span>
+        <input type="number" id="tilt-number-2" min="0" max="65535" value="32500">
     </div>
 
 
@@ -172,14 +172,14 @@ let offset = false;
 
 //Pan-Tilt Inputs
 const pan_slider_1 = document.getElementById('pan-slider-1');
-const pan_output_1 = document.getElementById('pan-output-1');
+const pan_output_1 = document.getElementById('pan-number-1');
 const tilt_slider_1 = document.getElementById('tilt-slider-1');
-const tilt_output_1 = document.getElementById('tilt-output-1');
+const tilt_output_1 = document.getElementById('tilt-number-1');
 
 const pan_slider_2 = document.getElementById('pan-slider-2');
-const pan_output_2 = document.getElementById('pan-output-2');
+const pan_output_2 = document.getElementById('pan-number-2');
 const tilt_slider_2 = document.getElementById('tilt-slider-2');
-const tilt_output_2 = document.getElementById('tilt-output-2');
+const tilt_output_2 = document.getElementById('tilt-number-2');
 
 
 
@@ -259,21 +259,60 @@ function addCurrentTime() {
 
     pan_slider_1.addEventListener('input', function() {
         pan_output_1.textContent = pan_slider_1.value;
+        pan_output_1.value = pan_slider_1.value;
         sendEvent({ event: "pan-1", pan_1: parseInt(pan_slider_1.value) });
     });
+
+    pan_output_1.addEventListener('input', function() {
+        // Clamp the value to stay within range limits
+        if (pan_output_1.value < pan_slider_1.min) pan_output_1.value = pan_slider_1.min;
+        if (pan_output_1.value > pan_slider_1.max) pan_output_1.value = pan_slider_1.max;
+
+        pan_slider_1.value = pan_output_1.value;
+    });
+
     tilt_slider_1.addEventListener('input', function() {
         tilt_output_1.textContent = tilt_slider_1.value;
+        tilt_output_1.value = tilt_slider_1.value;
         sendEvent({ event: "tilt-1", tilt_1: parseInt(tilt_slider_1.value) });
     });
 
+    tilt_output_1.addEventListener('input', function() {
+        // Clamp the value to stay within range limits
+        if (tilt_output_1.value < tilt_slider_1.min) tilt_output_1.value = tilt_slider_1.min;
+        if (tilt_output_1.value > tilt_slider_1.max) tilt_output_1.value = tilt_slider_1.max;
+
+        tilt_slider_1.value = tilt_output_1.value;
+    });
+    
     pan_slider_2.addEventListener('input', function() {
         pan_output_2.textContent = pan_slider_2.value;
+        pan_output_2.value = pan_slider_2.value;
         sendEvent({ event: "pan-2", pan_2: parseInt(pan_slider_2.value) });
     });
+
+    pan_output_2.addEventListener('input', function() {
+        // Clamp the value to stay within range limits
+        if (pan_output_2.value < pan_slider_2.min) pan_output_2.value = pan_slider_2.min;
+        if (pan_output_2.value > pan_slider_2.max) pan_output_2.value = pan_slider_2.max;
+
+        pan_slider_2.value = pan_output_2.value;
+    });
+
     tilt_slider_2.addEventListener('input', function() {
         tilt_output_2.textContent = tilt_slider_2.value;
+        tilt_output_2.value = tilt_slider_2.value;
         sendEvent({ event: "tilt-2", tilt_2: parseInt(tilt_slider_2.value) });
     });
+
+    tilt_output_2.addEventListener('input', function() {
+        // Clamp the value to stay within range limits
+        if (tilt_output_2.value < tilt_slider_2.min) tilt_output_2.value = tilt_slider_2.min;
+        if (tilt_output_2.value > tilt_slider_2.max) tilt_output_2.value = tilt_slider_2.max;
+
+        tilt_slider_2.value = tilt_output_2.value;
+    });
+
 
     smooth_button.addEventListener('click', () => {
         smoothness = !smoothness;
