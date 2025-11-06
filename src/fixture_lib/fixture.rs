@@ -39,6 +39,8 @@ pub enum FixtureComponent {
     CustomValue(CustomValue),
     Max,
     Zero,
+    Gobo(GoboWheel),
+    Focus(Focus),
 }
 
 impl FixtureComponent {
@@ -72,6 +74,12 @@ impl FixtureComponent {
             FixtureComponent::Zero => {
                 vec![0]
             }
+            FixtureComponent::Gobo(g) => {
+                vec![g.index]
+            }
+            FixtureComponent::Focus(f) => {
+                vec![f.value]
+            }
         }
     }
 }
@@ -102,5 +110,15 @@ pub struct ColorWheel {
 #[derive(Clone, PartialEq, Debug)]
 pub struct CustomValue {
     pub name: String,
+    pub value: u8,
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct GoboWheel {
+    pub index: u8,
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct Focus {
     pub value: u8,
 }

@@ -66,6 +66,38 @@ enum IncomingEvent {
         event: String,
         tilt_2: u16,
     },
+    Color1 {
+        event: String,
+        color_1: u8,
+    },
+    Color2 {
+        event: String,
+        color_2: u8,
+    },
+    Gobo1 {
+        event: String,
+        gobo_1: u8,
+    },
+    Gobo2 {
+        event: String,
+        gobo_2: u8,
+    },
+    Focus1 {
+        event: String,
+        focus_1: u8,
+    },
+    Focus2 {
+        event: String,
+        focus_2: u8,
+    },
+    Dimmer1 {
+        event: String,
+        dimmer_1: u8,
+    },
+    Dimmer2 {
+        event: String,
+        dimmer_2: u8,
+    },
 
 }
 
@@ -205,6 +237,70 @@ async fn handle_text_message(
             universe.lock().unwrap().get_fixture_by_id_mut(9).unwrap().components.iter_mut().for_each(|component| {
                 if let FixtureComponent::Position(pos) = component {
                     pos.tilt = tilt_2;
+                }
+            });
+        }
+        IncomingEvent::Color1 { color_1, .. } => {
+            println!("🎨 Color 1 set to: {}", color_1);
+            universe.lock().unwrap().get_fixture_by_id_mut(8).unwrap().components.iter_mut().for_each(|component| {
+                if let FixtureComponent::ColorWheel(color) = component {
+                    color.index = color_1;
+                }
+            });
+        }
+        IncomingEvent::Color2 { color_2, .. } => {
+            println!("🎨 Color 2 set to: {}", color_2);
+            universe.lock().unwrap().get_fixture_by_id_mut(9).unwrap().components.iter_mut().for_each(|component| {
+                if let FixtureComponent::ColorWheel(color) = component {
+                    color.index = color_2;
+                }
+            });
+        }
+        IncomingEvent::Gobo1 { gobo_1, .. } => {
+            println!("💫 Gobo 1 set to: {}", gobo_1);
+            universe.lock().unwrap().get_fixture_by_id_mut(8).unwrap().components.iter_mut().for_each(|component| {
+                if let FixtureComponent::Gobo(gobo) = component {
+                    gobo.index = gobo_1;
+                }
+            });
+        }
+        IncomingEvent::Gobo2 { gobo_2, .. } => {
+            println!("💫 Gobo 2 set to: {}", gobo_2);
+            universe.lock().unwrap().get_fixture_by_id_mut(9).unwrap().components.iter_mut().for_each(|component| {
+                if let FixtureComponent::Gobo(gobo) = component {
+                    gobo.index = gobo_2;
+                }
+            });
+        }
+        IncomingEvent::Focus1 { focus_1, .. } => {
+            println!("🔍 Focus 1 set to: {}", focus_1);
+            universe.lock().unwrap().get_fixture_by_id_mut(8).unwrap().components.iter_mut().for_each(|component| {
+                if let FixtureComponent::Focus(focus) = component {
+                    focus.value = focus_1;
+                }
+            });
+        }
+        IncomingEvent::Focus2 { focus_2, .. } => {
+            println!("🔍 Focus 2 set to: {}", focus_2);
+            universe.lock().unwrap().get_fixture_by_id_mut(9).unwrap().components.iter_mut().for_each(|component| {
+                if let FixtureComponent::Focus(focus) = component {
+                    focus.value = focus_2;
+                }
+            });
+        }
+        IncomingEvent::Dimmer1 { dimmer_1, .. } => {
+            println!("💡 Dimmer 1 set to: {}", dimmer_1);
+            universe.lock().unwrap().get_fixture_by_id_mut(8).unwrap().components.iter_mut().for_each(|component| {
+                if let FixtureComponent::Dimmer(dimmer) = component {
+                    dimmer.intensity = dimmer_1;
+                }
+            });
+        }
+        IncomingEvent::Dimmer2 { dimmer_2, .. } => {
+            println!("💡 Dimmer 2 set to: {}", dimmer_2);
+            universe.lock().unwrap().get_fixture_by_id_mut(9).unwrap().components.iter_mut().for_each(|component| {
+                if let FixtureComponent::Dimmer(dimmer) = component {
+                    dimmer.intensity = dimmer_2;
                 }
             });
         }
