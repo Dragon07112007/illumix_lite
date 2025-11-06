@@ -154,6 +154,16 @@
         <label for="volume">Focus 2</label><br>
         <input type="range" id="focus-slider-2" min="0" max="255" value="0">
     </div>
+    <br>
+
+    <div class="white">
+        <label for="volume">Dimmer 1</label><br>
+        <input type="range" id="dimmer-slider-1" min="0" max="255" value="0">
+    </div>
+    <div class="white">
+        <label for="volume">Dimmer 2</label><br>
+        <input type="range" id="dimmer-slider-2" min="0" max="255" value="0">
+    </div>
     
 
 
@@ -209,6 +219,9 @@ const color_slider_2 = document.getElementById('color-slider-2');
 //Focus Slider
 const focus_slider_1 = document.getElementById('focus-slider-1');
 const focus_slider_2 = document.getElementById('focus-slider-2');
+
+const dimmer_slider_1 = document.getElementById('dimmer-slider-1');
+const dimmer_slider_2 = document.getElementById('dimmer-slider-2');
 
 const timeArray = [];
 const MAX_SIZE = 4;
@@ -359,6 +372,13 @@ function addCurrentTime() {
     });
     focus_slider_2.addEventListener('input', () => {
         sendEvent({ event: "focus-2", focus_2: parseInt(focus_slider_2.value)});
+    });
+
+    dimmer_slider_1.addEventListener('input', () => {
+        sendEvent({ event: "dimmer-1", dimmer_1: parseInt(dimmer_slider_1.value)});
+    });
+    dimmer_slider_2.addEventListener('input', () => {
+        sendEvent({ event: "dimmer-2", dimmer_2: parseInt(dimmer_slider_2.value)});
     });
 
 
