@@ -137,6 +137,15 @@
     <br>
     <button class="tab-btn" id="send-mv">Send</button>
 
+    <div class="white">
+        <label for="volume">Color 1</label>
+        <input type="range" id="color-slider-1" min="0" max="255" value="0">
+    </div>
+    <div class="white">
+        <label for="volume">Color 2</label>
+        <input type="range" id="color-slider-2" min="0" max="255" value="0">
+    </div>
+
 
     <div>
         
@@ -182,6 +191,10 @@ const tilt_output_2 = document.getElementById('tilt-number-2');
 
 //MV Send
 const send_mv_button = document.getElementById('send-mv');
+
+//Color Slider
+const color_slider_1 = document.getElementById('color-slider-1');
+const color_slider_2 = document.getElementById('color-slider-2');
 
 const timeArray = [];
 const MAX_SIZE = 4;
@@ -318,6 +331,13 @@ function addCurrentTime() {
         sendEvent({ event: "tilt-1", tilt_1: parseInt(tilt_slider_1.value)});
         sendEvent({ event: "pan-2", pan_2: parseInt(pan_slider_2.value)});
         sendEvent({ event: "tilt-2", tilt_2: parseInt(tilt_slider_2.value)});
+    });
+
+    color_slider_1.addEventListener('input', () => {
+        sendEvent({ event: "color-1", color_1: parseInt(color_slider_1.value)});
+    });
+    color_slider_2.addEventListener('input', () => {
+        sendEvent({ event: "color-2", color_2: parseInt(color_slider_2.value)});
     });
 
 
