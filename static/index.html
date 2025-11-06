@@ -102,8 +102,10 @@
         <br>
         <button class="strobo" id="strobo-btn">Strobo</button> 
         
-        
-
+    </div>        
+    <label for="favcolor">Select your favorite color:</label>
+    <input type="color" id="favcolor" value="#ff0000">
+    <button id="color-btn">Send Color</button>
     <script>
         
 
@@ -112,6 +114,10 @@
 
 const ws = new WebSocket(`ws://${window.location.host}/ws`);
 const status = document.getElementById("status");
+const favcolor = document.getElementById("favcolor");
+// Hole den Button mit der ID 'myButton'
+const button = document.getElementById('color-btn');
+
     
     ws.onopen = () => console.log("WebSocket connected");
     ws.onmessage = (event) => console.log("Server says:", event.data);
@@ -141,6 +147,11 @@ const status = document.getElementById("status");
             sendEvent({ event: "preset_selected", number });
         });
     });
+
+    button.addEventListener('click', () => {
+    // Hier kannst du den Code einfügen, der ausgeführt werden soll, wenn der Button geklickt wird
+    sendEvent({ event: "color_selected", color: favcolor.value });
+});
 
     // Strobo button
     const stroboBtn = document.getElementById("strobo-btn");
