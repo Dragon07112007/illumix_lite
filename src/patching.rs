@@ -24,20 +24,7 @@ pub fn get_universe() -> Universe {
         name: "zoom".to_string(),
         value: 128,
     }));
-    led.add_component(FixtureComponent::Zero); //11
-    led.add_component(FixtureComponent::Zero); //12
-    led.add_component(FixtureComponent::Zero); //13
-    led.add_component(FixtureComponent::Zero); //14
-    led.add_component(FixtureComponent::Zero); //15
-    led.add_component(FixtureComponent::Zero); //16
-    led.add_component(FixtureComponent::Zero); //17
-    led.add_component(FixtureComponent::Zero); //18
-    led.add_component(FixtureComponent::Zero); //19
-
-    led.add_component(FixtureComponent::CustomValue(CustomValue {
-        name: "test".to_string(),
-        value: 255,
-    }));
+    
 
     universe.add_fixture(led);
 

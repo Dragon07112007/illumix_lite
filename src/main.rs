@@ -33,6 +33,9 @@ enum IncomingEvent {
         input1: String,
         input2: String,
     }, // <-- new variant
+    ColorSelected{
+        value: String,
+    }
 }
 
 #[tokio::main]
@@ -111,6 +114,17 @@ async fn handle_text_message(
         }
         IncomingEvent::InputValues { input1, input2, .. } => {
             println!("📝 Inputs received: input1='{}', input2='{}'", input1, input2);
+        }
+        IncomingEvent::ColorSelected { value } => {
+            match hex_to_rgb(&value) {
+                Ok((r, g, b)) => {
+                    println!("🎨 Color selected: {} -> RGB({}, {}, {})", value, r, g, b);
+                    
+                }
+                Err(e) => {
+                    eprintln!("Invalid color format '{}': {}", value, e);
+                }
+            }
         }
     }
 
@@ -192,3 +206,11 @@ fn pan_tilt_sweep(
         std::thread::sleep(std::time::Duration::from_millis(50));
     }
 }
+
+
+fn hex_to_rgb(hex: &str) -> Result<(u8, u8, u8), std::num::ParseIntError> {
+    let r = u8::from_str_radix(&hex[1..3], 16)?;
+    let g = u8::from_str_radix(&hex[3..5], 16)?;
+    let b = u8::from_str_radix(&hex[5..7], 16)?;
+    Ok((r, g, b))
+}   
