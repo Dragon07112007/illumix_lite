@@ -79,7 +79,7 @@
 </head>
 <body>
     <h1>Light Preset</h1>
-    <div id="status"><h3>Status: Off</h3></div>
+    <div><h3>Status: <div id="status"></div></h3></div>
 
     <!-- New input fields -->
 <div style="margin-bottom: 20px;">
@@ -111,7 +111,7 @@
 //
 
 const ws = new WebSocket(`ws://${window.location.host}/ws`);
-
+const status = document.getElementById("status");
     
     ws.onopen = () => console.log("WebSocket connected");
     ws.onmessage = (event) => console.log("Server says:", event.data);
@@ -130,7 +130,9 @@ const ws = new WebSocket(`ws://${window.location.host}/ws`);
     
         btn.addEventListener("click", () => {
             const number = btn.textContent;
+            status.innerHTML = number;
             sendEvent({ event: "preset_selected", number });
+            
         });
     
         btn.addEventListener("touchstart", (e) => {
