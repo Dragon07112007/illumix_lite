@@ -106,7 +106,9 @@
     <label for="favcolor">Select your favorite color:</label>
     <input type="color" id="favcolor" value="#ff0000">
     <button id="color-btn">Send Color</button>
-    <script>
+    <br>
+    <button id="bpm-button">TAP</button>
+<script>
         
 
 
@@ -117,6 +119,26 @@ const status = document.getElementById("status");
 const favcolor = document.getElementById("favcolor");
 // Hole den Button mit der ID 'myButton'
 const button = document.getElementById('color-btn');
+//BPM Button
+const bpm_button = document.getElementById('bpm-button');
+
+const timeArray = [];
+const MAX_SIZE = 4;
+
+// Function to add current time to the array
+function addCurrentTime() {
+  const now = Date.now(); // or just new Date()
+  
+  // If array is full, remove the oldest element
+  if (timeArray.length >= MAX_SIZE) {
+    timeArray.shift(); // removes the first element
+  }
+
+  // Add the new time
+  timeArray.push(now);
+
+  console.log(timeArray);
+}
 
     
     ws.onopen = () => console.log("WebSocket connected");
@@ -149,9 +171,29 @@ const button = document.getElementById('color-btn');
     });
 
     button.addEventListener('click', () => {
-    // Hier kannst du den Code einfügen, der ausgeführt werden soll, wenn der Button geklickt wird
-    sendEvent({ event: "color_selected", color: favcolor.value });
-});
+        // Hier kannst du den Code einfügen, der ausgeführt werden soll, wenn der Button geklickt wird
+        sendEvent({ event: "color_selected", color: favcolor.value });
+    });
+
+
+    bpm_button.addEventListener('click', () => {
+        addCurrentTime();
+        const differences = [];
+        for (let i = 0; i < timeArray.length - 1; i++) {
+        differences.push(timeArray[i + 1] - timeArray[i]);
+        }
+
+        // Calculate the average time between steps
+        const averageTime = differences.reduce((acc, curr) => acc + curr, 0) / differences.length;
+
+        // Convert the average time to BPM
+        const bpm = Math.round(60000 / averageTime);
+        
+        if (!isNaN(bpm)) {
+            sendEvent({ event: "bpm_tap", bpm });
+            console.log('Average time between steps (in ms):', bpm);
+        }
+    });
 
     // Strobo button
     const stroboBtn = document.getElementById("strobo-btn");
