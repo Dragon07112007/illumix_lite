@@ -113,24 +113,24 @@
     <!-- New input fields -->
 
     <div class="white">
-        <label for="volume">Pan 1:</label>
-        <input type="range" id="pan-slider-1" min="0" max="65535" value="32500">
+        <label for="volume">Pan 1:</label><br>
+        <input type="range" id="pan-slider-1" min="0" max="65535" value="32500"><br>
         <input type="number" id="pan-number-1" min="0" max="65535" value="32500">
     </div>
     <div class="white">
-        <label for="volume">Tilt 1:</label>
-        <input type="range" id="tilt-slider-1" min="0" max="65535" value="32500">
+        <label for="volume">Tilt 1:</label><br>
+        <input type="range" id="tilt-slider-1" min="0" max="65535" value="32500"><br>
         <input type="number" id="tilt-number-1" min="0" max="65535" value="32500">
     </div>
     <br>
     <div class="white">
-        <label for="volume">Pan 2:</label>
-        <input type="range" id="pan-slider-2" min="0" max="65535" value="32500">
+        <label for="volume">Pan 2:</label><br>
+        <input type="range" id="pan-slider-2" min="0" max="65535" value="32500"><br>
         <input type="number" id="pan-number-2" min="0" max="65535" value="32500">
     </div>
     <div class="white">
-        <label for="volume">Tilt 2:</label>
-        <input type="range" id="tilt-slider-2" min="0" max="65535" value="32500">
+        <label for="volume">Tilt 2:</label><br>
+        <input type="range" id="tilt-slider-2" min="0" max="65535" value="32500"><br>
         <input type="number" id="tilt-number-2" min="0" max="65535" value="32500">
     </div>
 
@@ -138,13 +138,23 @@
     <button class="tab-btn" id="send-mv">Send</button>
 
     <div class="white">
-        <label for="volume">Color 1</label>
+        <label for="volume">Color 1</label><br>
         <input type="range" id="color-slider-1" min="0" max="255" value="0">
     </div>
     <div class="white">
-        <label for="volume">Color 2</label>
+        <label for="volume">Color 2</label><br>
         <input type="range" id="color-slider-2" min="0" max="255" value="0">
     </div>
+    <br>
+    <div class="white">
+        <label for="volume">Focus 1</label><br>
+        <input type="range" id="focus-slider-1" min="0" max="255" value="0">
+    </div>
+    <div class="white">
+        <label for="volume">Focus 2</label><br>
+        <input type="range" id="focus-slider-2" min="0" max="255" value="0">
+    </div>
+    
 
 
     <div>
@@ -195,6 +205,10 @@ const send_mv_button = document.getElementById('send-mv');
 //Color Slider
 const color_slider_1 = document.getElementById('color-slider-1');
 const color_slider_2 = document.getElementById('color-slider-2');
+
+//Focus Slider
+const focus_slider_1 = document.getElementById('focus-slider-1');
+const focus_slider_2 = document.getElementById('focus-slider-2');
 
 const timeArray = [];
 const MAX_SIZE = 4;
@@ -338,6 +352,13 @@ function addCurrentTime() {
     });
     color_slider_2.addEventListener('input', () => {
         sendEvent({ event: "color-2", color_2: parseInt(color_slider_2.value)});
+    });
+
+    focus_slider_1.addEventListener('input', () => {
+        sendEvent({ event: "focus-1", focus_1: parseInt(focus_slider_1.value)});
+    });
+    focus_slider_2.addEventListener('input', () => {
+        sendEvent({ event: "focus-2", focus_2: parseInt(focus_slider_2.value)});
     });
 
 
