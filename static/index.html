@@ -34,6 +34,7 @@
             font-weight: 600;
             cursor: pointer;
         }
+        
 
         .lock-btn:focus {
             outline: none;
@@ -45,6 +46,30 @@
         }
 
         .lock-btn.locked {
+            background-color: #3b82f6;      /* blue fill when locked */
+            color: #fff;
+        }
+
+        .tab-btn {
+            background-color: #1e1e2f;      /* dark base */
+            color: #ffffff;                 /* white text */
+            border: 3px solid #3b82f6;      /* bright blue outline */
+            padding: 20px 28px;             /* bigger padding */
+            border-radius: 10px;            /* slightly rounder corners */
+            font-size: 18px;                /* larger text */
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .tab-btn:focus {
+            outline: none;
+            border-color: #60a5fa;          /* lighter blue focus outline */
+        }
+
+        .tab-btn:active {
+            background-color: #111122;      /* darker on press */
+        }
+
+        .tab-btn.locked {
             background-color: #3b82f6;      /* blue fill when locked */
             color: #fff;
         }
@@ -79,7 +104,7 @@
 </head>
 <body>
     <h1>Light Preset</h1>
-    <div><h3>Status: <div id="status"></div></h3></div>
+    <div><h3>Status: <label id="status"></label></h3></div>
 
     <!-- New input fields -->
 <div style="margin-bottom: 20px;">
@@ -102,12 +127,12 @@
         <br>
         <button class="strobo" id="strobo-btn">Strobo</button> 
         
-    </div>        
-    <label for="favcolor">Select your favorite color:</label>
-    <input type="color" id="favcolor" value="#ff0000">
-    <button id="color-btn">Send Color</button>
+    </div>
     <br>
-    <button id="bpm-button">TAP</button>
+    <button class="tab-btn" id="smooth-button">Smooth</button>
+    <button class="tab-btn" id="offset-button">Offset</button>
+    <br>
+    <button class="tab-btn" id="bpm-button">TAP</button>
 <script>
         
 
@@ -121,6 +146,13 @@ const favcolor = document.getElementById("favcolor");
 const button = document.getElementById('color-btn');
 //BPM Button
 const bpm_button = document.getElementById('bpm-button');
+//Smooth Button
+const smooth_button = document.getElementById('smooth-button');
+let smoothness = false;
+//Offset Button
+const offset_button = document.getElementById('offset-button');
+let offset = false;
+
 
 const timeArray = [];
 const MAX_SIZE = 4;
@@ -170,13 +202,14 @@ function addCurrentTime() {
         });
     });
 
-    button.addEventListener('click', () => {
+    /*button.addEventListener('click', () => {
         // Hier kannst du den Code einfügen, der ausgeführt werden soll, wenn der Button geklickt wird
         sendEvent({ event: "color_selected", color: favcolor.value });
-    });
+    });*/
 
 
     bpm_button.addEventListener('click', () => {
+        
         addCurrentTime();
         const differences = [];
         for (let i = 0; i < timeArray.length - 1; i++) {
@@ -193,6 +226,18 @@ function addCurrentTime() {
             sendEvent({ event: "bpm", bpm: bpm });
             console.log('Average time between steps (in ms):', bpm);
         }
+    });
+
+    smooth_button.addEventListener('click', () => {
+        smoothness = !smoothness;
+        //alert("Smoothness set to: " + smoothness);
+        sendEvent({ event: "smooth_toggle", smooth: smoothness});
+    });
+
+    offset_button.addEventListener('click', () => {
+        offset = !offset;
+        //alert("Offset set to: " + offset);
+        sendEvent({ event: "offset_toggle", offset: offset});
     });
 
     // Strobo button
