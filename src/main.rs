@@ -79,60 +79,13 @@ async fn handle_websocket(ws: warp::ws::WebSocket, universe: Arc<Mutex<lib::univ
 
     while let Some(result) = ws_rx.next().await {
         match result {
-            Ok(msg) => {
-                if msg.is_text() {
-                    let text = msg.to_str().unwrap();
-                    match serde_json::from_str::<IncomingEvent>(text) {
-                        Ok(event) => match event {
-                            IncomingEvent::Strobo { state, .. } => {
-                                if state == "down" {
-                                    println!("💡 Strobo PRESSED");
-                                    universe.lock().unwrap().get_fixture_by_id_mut(1).map(
-                                        |fixture| {
-                                            if let Some(FixtureComponent::Dimmer(dimmer)) =
-                                                fixture.components.iter_mut().find(|comp| {
-                                                    matches!(comp, FixtureComponent::Dimmer(_))
-                                                })
-                                            {
-                                                dimmer.intensity = 255;
-                                            }
-                                        },
-                                    );
-                                } else {
-                                    println!("💡 Strobo RELEASED");
-                                    universe.lock().unwrap().get_fixture_by_id_mut(1).map(
-                                        |fixture| {
-                                            if let Some(FixtureComponent::Dimmer(dimmer)) =
-                                                fixture.components.iter_mut().find(|comp| {
-                                                    matches!(comp, FixtureComponent::Dimmer(_))
-                                                })
-                                            {
-                                                dimmer.intensity = 0;
-                                            }
-                                        },
-                                    );
-                                }
-                            }
-                            IncomingEvent::Preset { number, .. } => {
-                                println!("🔢 Preset button pressed: {}", number);
-                            }
-                            IncomingEvent::InputValues { input1, input2, .. } => {
-                                println!(
-                                    "📝 Inputs received: input1='{}', input2='{}'",
-                                    input1, input2
-                                );
-                            }
-                        },
-                        Err(e) => eprintln!("Failed to parse JSON: {}", e),
-                    }
-
-                    // Optional: echo back to client
-                    if let Err(e) = ws_tx.send(Message::text("ok")).await {
-                        eprintln!("Send error: {}", e);
-                        break;
-                    }
+            Ok(msg) if msg.is_text() => {
+                if let Err(e) = handle_text_message(&msg, &universe, &mut ws_tx).await {
+                    eprintln!("Error handling message: {}", e);
+                    break;
                 }
             }
+            Ok(_) => (), // Ignore non-text messages
             Err(e) => {
                 eprintln!("WebSocket error: {}", e);
                 break;
@@ -141,6 +94,51 @@ async fn handle_websocket(ws: warp::ws::WebSocket, universe: Arc<Mutex<lib::univ
     }
 
     println!("Connection closed.");
+}
+
+async fn handle_text_message(
+    msg: &Message,
+    universe: &Arc<Mutex<lib::universe::Universe>>,
+    ws_tx: &mut futures::stream::SplitSink<warp::ws::WebSocket, Message>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let text = msg.to_str().unwrap();
+    let event = serde_json::from_str::<IncomingEvent>(text)?;
+
+    match event {
+        IncomingEvent::Strobo { state, .. } => handle_strobo(state, universe),
+        IncomingEvent::Preset { number, .. } => {
+            println!("🔢 Preset button pressed: {}", number);
+        }
+        IncomingEvent::InputValues { input1, input2, .. } => {
+            println!("📝 Inputs received: input1='{}', input2='{}'", input1, input2);
+        }
+    }
+
+    // Echo back to client
+    ws_tx.send(Message::text("ok")).await?;
+    Ok(())
+}
+
+fn handle_strobo(state: String, universe: &Arc<Mutex<lib::universe::Universe>>) {
+    let intensity = if state == "down" {
+        println!("💡 Strobo PRESSED");
+        255
+    } else {
+        println!("💡 Strobo RELEASED");
+        0
+    };
+
+    if let Ok(mut universe) = universe.lock() {
+        if let Some(fixture) = universe.get_fixture_by_id_mut(1) {
+            if let Some(FixtureComponent::Dimmer(dimmer)) = fixture
+                .components
+                .iter_mut()
+                .find(|comp| matches!(comp, FixtureComponent::Dimmer(_)))
+            {
+                dimmer.intensity = intensity;
+            }
+        }
+    }
 }
 
 fn degree_to_16_bit(degree: u32, range: u32) -> u32 {
