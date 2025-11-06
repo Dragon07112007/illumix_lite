@@ -111,11 +111,7 @@
     <div><h3>Status: <label id="status"></label></h3></div>
 
     <!-- New input fields -->
-    <div style="margin-bottom: 20px;">
-        <input type="text" id="input1" placeholder="Pan" style="padding:10px; font-size:16px; margin-right:10px;">
-        <input type="text" id="input2" placeholder="Tilt" style="padding:10px; font-size:16px; margin-right:10px;">
-        <button id="send-inputs" style="padding:10px 20px; font-size:16px;">Send Inputs</button>
-    </div>
+
     <div class="white">
         <label for="volume">Pan 1:</label>
         <input type="range" id="pan-slider-1" min="0" max="65535" value="32500">
@@ -137,6 +133,9 @@
         <input type="range" id="tilt-slider-2" min="0" max="65535" value="32500">
         <input type="number" id="tilt-number-2" min="0" max="65535" value="32500">
     </div>
+
+    <br>
+    <button class="tab-btn" id="send-mv">Send</button>
 
 
     <div>
@@ -181,7 +180,8 @@ const pan_output_2 = document.getElementById('pan-number-2');
 const tilt_slider_2 = document.getElementById('tilt-slider-2');
 const tilt_output_2 = document.getElementById('tilt-number-2');
 
-
+//MV Send
+const send_mv_button = document.getElementById('send-mv');
 
 const timeArray = [];
 const MAX_SIZE = 4;
@@ -313,6 +313,13 @@ function addCurrentTime() {
         tilt_slider_2.value = tilt_output_2.value;
     });
 
+    send_mv_button.addEventListener('click', () => {
+        sendEvent({ event: "pan-1", pan_1: parseInt(pan_slider_1.value)});
+        sendEvent({ event: "tilt-1", tilt_1: parseInt(tilt_slider_1.value)});
+        sendEvent({ event: "pan-2", pan_2: parseInt(pan_slider_2.value)});
+        sendEvent({ event: "tilt-2", tilt_2: parseInt(tilt_slider_2.value)});
+    });
+
 
     smooth_button.addEventListener('click', () => {
         smoothness = !smoothness;
@@ -352,13 +359,13 @@ function addCurrentTime() {
     stroboBtn.addEventListener("touchend", (e) => { e.preventDefault(); if(stroboPressed){ stroboPressed=false; handleStrobo("up"); }});
     stroboBtn.addEventListener("touchcancel", (e) => { e.preventDefault(); if(stroboPressed){ stroboPressed=false; handleStrobo("up"); }});
 
-    // Send input fields
+    /* // Send input fields
     const sendInputsBtn = document.getElementById("send-inputs");
     sendInputsBtn.addEventListener("click", () => {
         const input1 = document.getElementById("input1").value;
         const input2 = document.getElementById("input2").value;
         sendEvent({ event: "input_values", input1, input2 });
-    });
+    }); */
     </script>
         
 </body>
