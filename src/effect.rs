@@ -1,5 +1,5 @@
-use std::time;
 use std::sync::{Arc, Mutex};
+use std::time;
 
 pub trait Effect {
     /// Advance the present by `time_delta` and apply any changes to `universe`.
@@ -46,8 +46,6 @@ impl Effect for GradientEffect {
         }
     }
 }
-
-
 
 pub fn launch_present_thread(
     universe: Arc<Mutex<crate::lib::universe::Universe>>,

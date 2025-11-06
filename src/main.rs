@@ -1,6 +1,7 @@
-use std::{sync::{Arc, Mutex}, time};
-
-use tokio::net::TcpListener;
+use std::{
+    sync::{Arc, Mutex},
+    time,
+};
 
 use futures::{SinkExt, StreamExt};
 use serde::Deserialize;
@@ -10,10 +11,11 @@ use warp::{Filter, filters::ws::Message};
 use crate::{lib::fixture::FixtureComponent, patching::get_universe};
 
 mod artnet;
+mod dmx;
+mod effect;
 #[path = "fixture_lib/lib.rs"]
 mod lib;
 mod patching;
-mod effect;
 
 #[derive(Deserialize, Debug)]
 #[serde(untagged)]
@@ -37,20 +39,24 @@ enum IncomingEvent {
 async fn main() {
     let universe = Arc::new(Mutex::new(get_universe()));
     artnet::launch_artnet_send_thread(universe.clone());
+    //dmx::launch_dmx_send_thread(universe.clone());
     effect::launch_present_thread(universe.clone(), time::Duration::from_millis(100));
 
-    universe.lock().unwrap().insert_present(effect::GradientEffect {
-        speed: 0.5,
-        colors: vec![
-            [255, 0, 0],
-            [0, 255, 0],
-            [0, 0, 255],
-            [255, 255, 0],
-            [0, 255, 255],
-            [255, 0, 255],
-        ],
-        position: 0.0,
-    });
+    universe
+        .lock()
+        .unwrap()
+        .insert_present(effect::GradientEffect {
+            speed: 0.5,
+            colors: vec![
+                [255, 0, 0],
+                [0, 255, 0],
+                [0, 0, 255],
+                [255, 255, 0],
+                [0, 255, 255],
+                [255, 0, 255],
+            ],
+            position: 0.0,
+        });
 
     let universe_filter = warp::any().map(move || universe.clone());
 
