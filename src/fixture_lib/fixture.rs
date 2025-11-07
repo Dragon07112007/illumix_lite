@@ -93,6 +93,10 @@ pub struct Color {
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct Dimmer {
+    /// The user-set local dimmer (0-255). This is the fixture's own dimmer value
+    /// before global scaling is applied.
+    pub local: u8,
+    /// The effective intensity (0-255) after applying global dimmer scaling.
     pub intensity: u8,
 }
 

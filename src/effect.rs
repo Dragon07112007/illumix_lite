@@ -62,10 +62,10 @@ pub struct ColorSwapEffect {
     pub bpm: f32,
     pub offset_pattern: bool,
     pub fixture_offsets: Vec<f32>,
-    pub smooth: bool,                // Enable/disable smooth transitions
+    pub smooth: bool, // Enable/disable smooth transitions
     accumulated_time: f32,
     current_colors: Vec<ParColor>,
-    transition_progress: Vec<f32>,   // Tracks transition progress per fixture (0.0 to 1.0)
+    transition_progress: Vec<f32>, // Tracks transition progress per fixture (0.0 to 1.0)
 }
 
 impl ColorSwapEffect {
@@ -75,11 +75,7 @@ impl ColorSwapEffect {
         let mut transition_progress = vec![1.0; fixture_count];
 
         for i in 0..fixture_count {
-            let color_offset = if offset_pattern {
-                i % 3
-            } else {
-                0
-            };
+            let color_offset = if offset_pattern { i % 3 } else { 0 };
             current_colors.push(match color_offset {
                 0 => ParColor::Cool,
                 1 => ParColor::Warm,
@@ -103,11 +99,7 @@ impl ColorSwapEffect {
     pub fn set_offset_pattern(&mut self, offset_pattern: bool) {
         self.offset_pattern = offset_pattern;
         for i in 0..self.current_colors.len() {
-            let color_offset = if offset_pattern {
-                i % 3
-            } else {
-                0
-            };
+            let color_offset = if offset_pattern { i % 3 } else { 0 };
             self.current_colors[i] = match color_offset {
                 0 => ParColor::Cool,
                 1 => ParColor::Warm,
@@ -117,18 +109,24 @@ impl ColorSwapEffect {
         }
     }
 
-    fn apply_transition(&self, fixture: &mut crate::lib::fixture::Fixture, color: ParColor, intensity: u8) {
+    fn apply_transition(
+        &self,
+        fixture: &mut crate::lib::fixture::Fixture,
+        color: ParColor,
+        intensity: u8,
+    ) {
         // Helper to find and update a color component
-        let update_component = |name: &str, value: u8, fixture: &mut crate::lib::fixture::Fixture| {
-            for comp in fixture.components.iter_mut() {
-                if let crate::lib::fixture::FixtureComponent::CustomValue(cv) = comp {
-                    if cv.name == name {
-                        cv.value = value;
-                        break;
+        let update_component =
+            |name: &str, value: u8, fixture: &mut crate::lib::fixture::Fixture| {
+                for comp in fixture.components.iter_mut() {
+                    if let crate::lib::fixture::FixtureComponent::CustomValue(cv) = comp {
+                        if cv.name == name {
+                            cv.value = value;
+                            break;
+                        }
                     }
                 }
-            }
-        };
+            };
 
         // Reset all colors first
         update_component("cool_white", 0, fixture);
@@ -149,11 +147,11 @@ impl Effect for ColorSwapEffect {
     fn tick(&mut self, time_delta: time::Duration, universe: &mut crate::lib::universe::Universe) {
         let delta_seconds = time_delta.as_secs_f32();
         self.accumulated_time += delta_seconds;
-        
+
         // Calculate beat duration and global progress
         let seconds_per_beat = 60.0 / self.bpm;
         let cycle_progress = (self.accumulated_time / seconds_per_beat) % 1.0;
-        
+
         // Detect beat change (synchronized for all fixtures)
         let is_beat_change = cycle_progress < delta_seconds / seconds_per_beat;
 
@@ -188,20 +186,22 @@ impl Effect for ColorSwapEffect {
                             }
                         }
                     }
-                    let set_intensity = |color: ParColor, value: u8, fixture: &mut crate::lib::fixture::Fixture| {
-                        let name = match color {
-                            ParColor::Cool => "cool_white",
-                            ParColor::Warm => "warm_white",
-                            ParColor::Amber => "amber",
-                        };
-                        for comp in fixture.components.iter_mut() {
-                            if let crate::lib::fixture::FixtureComponent::CustomValue(cv) = comp {
-                                if cv.name == name {
-                                    cv.value = value;
+                    let set_intensity =
+                        |color: ParColor, value: u8, fixture: &mut crate::lib::fixture::Fixture| {
+                            let name = match color {
+                                ParColor::Cool => "cool_white",
+                                ParColor::Warm => "warm_white",
+                                ParColor::Amber => "amber",
+                            };
+                            for comp in fixture.components.iter_mut() {
+                                if let crate::lib::fixture::FixtureComponent::CustomValue(cv) = comp
+                                {
+                                    if cv.name == name {
+                                        cv.value = value;
+                                    }
                                 }
                             }
-                        }
-                    };
+                        };
                     set_intensity(current_color, ((1.0 - t) * 255.0) as u8, fixture);
                     set_intensity(next_color, (t * 255.0) as u8, fixture);
                 } else {
@@ -214,11 +214,11 @@ impl Effect for ColorSwapEffect {
             }
         }
     }
-    
+
     fn as_any(&self) -> &dyn Any {
         self
     }
-    
+
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
     }
@@ -263,11 +263,11 @@ impl Effect for GradientEffect {
             }
         }
     }
-    
+
     fn as_any(&self) -> &dyn Any {
         self
     }
-    
+
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
     }
@@ -293,6 +293,17 @@ pub fn launch_present_thread(
                     //println!("Ticked effect");
                 }
                 universe.effects = effects;
+                // After effects run, enforce global dimmer rules:
+                // - For every fixture with a Dimmer component, compute effective intensity
+                //   as (local * global_dimmer) / 255.
+                let global = universe.global_dimmer;
+                for fixture in universe.fixtures.iter_mut() {
+                    for comp in fixture.components.iter_mut() {
+                        if let crate::lib::fixture::FixtureComponent::Dimmer(d) = comp {
+                            d.intensity = ((d.local as u16 * global as u16) / 255) as u8;
+                        }
+                    }
+                }
             }
 
             std::thread::sleep(tick_rate);

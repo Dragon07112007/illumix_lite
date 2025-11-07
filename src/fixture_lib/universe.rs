@@ -5,6 +5,7 @@ use crate::lib::fixture::Fixture;
 pub struct Universe {
     pub fixtures: Vec<Fixture>,
     pub effects: Vec<Box<dyn crate::effect::Effect + Send>>,
+    pub global_dimmer: u8,
 }
 
 impl Universe {
@@ -12,6 +13,7 @@ impl Universe {
         Universe {
             fixtures: Vec::new(),
             effects: Vec::new(),
+            global_dimmer: 255,
         }
     }
 
@@ -59,6 +61,7 @@ impl std::fmt::Debug for Universe {
         f.debug_struct("Universe")
             .field("fixtures", &self.fixtures)
             .field("presents_len", &self.effects.len())
+            .field("global_dimmer", &self.global_dimmer)
             .finish()
     }
 }
@@ -68,6 +71,7 @@ impl Clone for Universe {
         Universe {
             fixtures: self.fixtures.clone(),
             effects: Vec::new(),
+            global_dimmer: self.global_dimmer,
         }
     }
 }

@@ -3,7 +3,6 @@ use std::{
     time,
 };
 
-
 use futures::{SinkExt, StreamExt};
 use serde::Deserialize;
 
@@ -42,11 +41,11 @@ enum IncomingEvent {
         event: String,
         smooth: bool,
     },
-    Offset{
+    Offset {
         event: String,
         offset: bool,
     },
-    Bpm{
+    Bpm {
         event: String,
         bpm: u32,
     },
@@ -98,7 +97,10 @@ enum IncomingEvent {
         event: String,
         dimmer_2: u8,
     },
-
+    GlobalDimmer {
+        event: String,
+        dimmer: u8,
+    },
 }
 
 #[tokio::main]
@@ -114,9 +116,9 @@ async fn main() {
         .unwrap()
         .insert_present(effect::ColorSwapEffect::new(
             40.0,  // 120 BPM (2 beats per second)
-            7,      // 7 fixtures
-            true,   // Enable offset pattern - different starting colors
-            false,  // Disable smooth transitions for testing
+            7,     // 7 fixtures
+            true,  // Enable offset pattern - different starting colors
+            false, // Disable smooth transitions for testing
         ));
 
     let universe_filter = warp::any().map(move || universe.clone());
@@ -171,138 +173,260 @@ async fn handle_text_message(
             println!("🔢 Preset button pressed: {}", number);
         }
         IncomingEvent::InputValues { input1, input2, .. } => {
-            println!("📝 Inputs received: input1='{}', input2='{}'", input1, input2);
+            println!(
+                "📝 Inputs received: input1='{}', input2='{}'",
+                input1, input2
+            );
         }
-        IncomingEvent::Color { color, .. } => {
-            match hex_to_rgb(&color) {
-                Ok((r, g, b)) => {
-                    println!("🎨 Color selected: {} -> RGB({}, {}, {})", color, r, g, b);
-                    
-                }
-                Err(e) => {
-                    eprintln!("Invalid color format '{}': {}", color, e);
-                }
+        IncomingEvent::Color { color, .. } => match hex_to_rgb(&color) {
+            Ok((r, g, b)) => {
+                println!("🎨 Color selected: {} -> RGB({}, {}, {})", color, r, g, b);
             }
-        }
+            Err(e) => {
+                eprintln!("Invalid color format '{}': {}", color, e);
+            }
+        },
         IncomingEvent::Smooth { smooth, .. } => {
             println!("🔄 Smooth toggle: {}", smooth);
-            universe.lock().unwrap().effects.iter_mut().for_each(|present| {
-                if let Some(color_swap) = present.as_mut().as_any_mut().downcast_mut::<effect::ColorSwapEffect>() {
-                    color_swap.smooth = smooth;
-                }
-            });
+            universe
+                .lock()
+                .unwrap()
+                .effects
+                .iter_mut()
+                .for_each(|present| {
+                    if let Some(color_swap) = present
+                        .as_mut()
+                        .as_any_mut()
+                        .downcast_mut::<effect::ColorSwapEffect>()
+                    {
+                        color_swap.smooth = smooth;
+                    }
+                });
         }
         IncomingEvent::Offset { offset, .. } => {
             println!("🔀 Offset toggle: {}", offset);
-            universe.lock().unwrap().effects.iter_mut().for_each(|present| {
-                if let Some(color_swap) = present.as_mut().as_any_mut().downcast_mut::<effect::ColorSwapEffect>() {
-                    color_swap.set_offset_pattern(offset);
-                }
-            });
+            universe
+                .lock()
+                .unwrap()
+                .effects
+                .iter_mut()
+                .for_each(|present| {
+                    if let Some(color_swap) = present
+                        .as_mut()
+                        .as_any_mut()
+                        .downcast_mut::<effect::ColorSwapEffect>()
+                    {
+                        color_swap.set_offset_pattern(offset);
+                    }
+                });
         }
         IncomingEvent::Bpm { bpm, .. } => {
             println!("⏱️ BPM set to: {}", bpm);
-            universe.lock().unwrap().effects.iter_mut().for_each(|present| {
-                if let Some(color_swap) = present.as_mut().as_any_mut().downcast_mut::<effect::ColorSwapEffect>() {
-                    color_swap.bpm = bpm as f32;
-                }
-            });
+            universe
+                .lock()
+                .unwrap()
+                .effects
+                .iter_mut()
+                .for_each(|present| {
+                    if let Some(color_swap) = present
+                        .as_mut()
+                        .as_any_mut()
+                        .downcast_mut::<effect::ColorSwapEffect>()
+                    {
+                        color_swap.bpm = bpm as f32;
+                    }
+                });
         }
         IncomingEvent::Pan1 { pan_1, .. } => {
             println!("↔️ Pan 1 set to: {}", pan_1);
-            universe.lock().unwrap().get_fixture_by_id_mut(8).unwrap().components.iter_mut().for_each(|component| {
-                if let FixtureComponent::Position(pos) = component {
-                    pos.pan = pan_1;
-                }
-            });
+            universe
+                .lock()
+                .unwrap()
+                .get_fixture_by_id_mut(8)
+                .unwrap()
+                .components
+                .iter_mut()
+                .for_each(|component| {
+                    if let FixtureComponent::Position(pos) = component {
+                        pos.pan = pan_1;
+                    }
+                });
         }
         IncomingEvent::Tilt1 { tilt_1, .. } => {
             println!("↕️ Tilt 1 set to: {}", tilt_1);
-            universe.lock().unwrap().get_fixture_by_id_mut(8).unwrap().components.iter_mut().for_each(|component| {
-                if let FixtureComponent::Position(pos) = component {
-                    pos.tilt = tilt_1;
-                }
-            });
+            universe
+                .lock()
+                .unwrap()
+                .get_fixture_by_id_mut(8)
+                .unwrap()
+                .components
+                .iter_mut()
+                .for_each(|component| {
+                    if let FixtureComponent::Position(pos) = component {
+                        pos.tilt = tilt_1;
+                    }
+                });
         }
         IncomingEvent::Pan2 { pan_2, .. } => {
             println!("↔️ Pan 2 set to: {}", pan_2);
-            universe.lock().unwrap().get_fixture_by_id_mut(9).unwrap().components.iter_mut().for_each(|component| {
-                if let FixtureComponent::Position(pos) = component {
-                    pos.pan = pan_2;
-                }
-            });
+            universe
+                .lock()
+                .unwrap()
+                .get_fixture_by_id_mut(9)
+                .unwrap()
+                .components
+                .iter_mut()
+                .for_each(|component| {
+                    if let FixtureComponent::Position(pos) = component {
+                        pos.pan = pan_2;
+                    }
+                });
         }
         IncomingEvent::Tilt2 { tilt_2, .. } => {
             println!("↕️ Tilt 2 set to: {}", tilt_2);
-            universe.lock().unwrap().get_fixture_by_id_mut(9).unwrap().components.iter_mut().for_each(|component| {
-                if let FixtureComponent::Position(pos) = component {
-                    pos.tilt = tilt_2;
-                }
-            });
+            universe
+                .lock()
+                .unwrap()
+                .get_fixture_by_id_mut(9)
+                .unwrap()
+                .components
+                .iter_mut()
+                .for_each(|component| {
+                    if let FixtureComponent::Position(pos) = component {
+                        pos.tilt = tilt_2;
+                    }
+                });
         }
         IncomingEvent::Color1 { color_1, .. } => {
             println!("🎨 Color 1 set to: {}", color_1);
-            universe.lock().unwrap().get_fixture_by_id_mut(8).unwrap().components.iter_mut().for_each(|component| {
-                if let FixtureComponent::ColorWheel(color) = component {
-                    color.index = color_1;
-                }
-            });
+            universe
+                .lock()
+                .unwrap()
+                .get_fixture_by_id_mut(8)
+                .unwrap()
+                .components
+                .iter_mut()
+                .for_each(|component| {
+                    if let FixtureComponent::ColorWheel(color) = component {
+                        color.index = color_1;
+                    }
+                });
         }
         IncomingEvent::Color2 { color_2, .. } => {
             println!("🎨 Color 2 set to: {}", color_2);
-            universe.lock().unwrap().get_fixture_by_id_mut(9).unwrap().components.iter_mut().for_each(|component| {
-                if let FixtureComponent::ColorWheel(color) = component {
-                    color.index = color_2;
-                }
-            });
+            universe
+                .lock()
+                .unwrap()
+                .get_fixture_by_id_mut(9)
+                .unwrap()
+                .components
+                .iter_mut()
+                .for_each(|component| {
+                    if let FixtureComponent::ColorWheel(color) = component {
+                        color.index = color_2;
+                    }
+                });
         }
         IncomingEvent::Gobo1 { gobo_1, .. } => {
             println!("💫 Gobo 1 set to: {}", gobo_1);
-            universe.lock().unwrap().get_fixture_by_id_mut(8).unwrap().components.iter_mut().for_each(|component| {
-                if let FixtureComponent::Gobo(gobo) = component {
-                    gobo.index = gobo_1;
-                }
-            });
+            universe
+                .lock()
+                .unwrap()
+                .get_fixture_by_id_mut(8)
+                .unwrap()
+                .components
+                .iter_mut()
+                .for_each(|component| {
+                    if let FixtureComponent::Gobo(gobo) = component {
+                        gobo.index = gobo_1;
+                    }
+                });
         }
         IncomingEvent::Gobo2 { gobo_2, .. } => {
             println!("💫 Gobo 2 set to: {}", gobo_2);
-            universe.lock().unwrap().get_fixture_by_id_mut(9).unwrap().components.iter_mut().for_each(|component| {
-                if let FixtureComponent::Gobo(gobo) = component {
-                    gobo.index = gobo_2;
-                }
-            });
+            universe
+                .lock()
+                .unwrap()
+                .get_fixture_by_id_mut(9)
+                .unwrap()
+                .components
+                .iter_mut()
+                .for_each(|component| {
+                    if let FixtureComponent::Gobo(gobo) = component {
+                        gobo.index = gobo_2;
+                    }
+                });
         }
         IncomingEvent::Focus1 { focus_1, .. } => {
             println!("🔍 Focus 1 set to: {}", focus_1);
-            universe.lock().unwrap().get_fixture_by_id_mut(8).unwrap().components.iter_mut().for_each(|component| {
-                if let FixtureComponent::Focus(focus) = component {
-                    focus.value = focus_1;
-                }
-            });
+            universe
+                .lock()
+                .unwrap()
+                .get_fixture_by_id_mut(8)
+                .unwrap()
+                .components
+                .iter_mut()
+                .for_each(|component| {
+                    if let FixtureComponent::Focus(focus) = component {
+                        focus.value = focus_1;
+                    }
+                });
         }
         IncomingEvent::Focus2 { focus_2, .. } => {
             println!("🔍 Focus 2 set to: {}", focus_2);
-            universe.lock().unwrap().get_fixture_by_id_mut(9).unwrap().components.iter_mut().for_each(|component| {
-                if let FixtureComponent::Focus(focus) = component {
-                    focus.value = focus_2;
-                }
-            });
+            universe
+                .lock()
+                .unwrap()
+                .get_fixture_by_id_mut(9)
+                .unwrap()
+                .components
+                .iter_mut()
+                .for_each(|component| {
+                    if let FixtureComponent::Focus(focus) = component {
+                        focus.value = focus_2;
+                    }
+                });
         }
         IncomingEvent::Dimmer1 { dimmer_1, .. } => {
             println!("💡 Dimmer 1 set to: {}", dimmer_1);
-            universe.lock().unwrap().get_fixture_by_id_mut(8).unwrap().components.iter_mut().for_each(|component| {
-                if let FixtureComponent::Dimmer(dimmer) = component {
-                    dimmer.intensity = dimmer_1;
-                }
-            });
+            let mut u = universe.lock().unwrap();
+            let g = u.global_dimmer;
+            if let Some(fx) = u.get_fixture_by_id_mut(8) {
+                fx.components.iter_mut().for_each(|component| {
+                    if let FixtureComponent::Dimmer(dimmer) = component {
+                        // store local setting and compute effective intensity using global dimmer
+                        dimmer.local = dimmer_1;
+                        dimmer.intensity = ((dimmer.local as u16 * g as u16) / 255) as u8;
+                    }
+                });
+            }
         }
         IncomingEvent::Dimmer2 { dimmer_2, .. } => {
             println!("💡 Dimmer 2 set to: {}", dimmer_2);
-            universe.lock().unwrap().get_fixture_by_id_mut(9).unwrap().components.iter_mut().for_each(|component| {
-                if let FixtureComponent::Dimmer(dimmer) = component {
-                    dimmer.intensity = dimmer_2;
+            let mut u = universe.lock().unwrap();
+            let g = u.global_dimmer;
+            if let Some(fx) = u.get_fixture_by_id_mut(9) {
+                fx.components.iter_mut().for_each(|component| {
+                    if let FixtureComponent::Dimmer(dimmer) = component {
+                        dimmer.local = dimmer_2;
+                        dimmer.intensity = ((dimmer.local as u16 * g as u16) / 255) as u8;
+                    }
+                });
+            }
+        }
+        IncomingEvent::GlobalDimmer { dimmer, .. } => {
+            println!("🌐 Global dimmer set to: {}", dimmer);
+            let mut u = universe.lock().unwrap();
+            u.global_dimmer = dimmer;
+            // Recompute effective intensities for all fixtures using their local dimmer value
+            let g = u.global_dimmer;
+            for fixture in u.fixtures.iter_mut() {
+                for component in fixture.components.iter_mut() {
+                    if let FixtureComponent::Dimmer(d) = component {
+                        d.intensity = ((d.local as u16 * g as u16) / 255) as u8;
+                    }
                 }
-            });
+            }
         }
     }
 
@@ -320,15 +444,20 @@ fn handle_strobo(state: String, universe: &Arc<Mutex<lib::universe::Universe>>) 
         0
     };
 
-    universe.lock().unwrap().fixtures.iter_mut().for_each(|fixture| {
-        for component in fixture.components.iter_mut() {
-            if let FixtureComponent::CustomValue(cv) = component {
-                if cv.name == "strobe" {
-                    cv.value = intensity;
+    universe
+        .lock()
+        .unwrap()
+        .fixtures
+        .iter_mut()
+        .for_each(|fixture| {
+            for component in fixture.components.iter_mut() {
+                if let FixtureComponent::CustomValue(cv) = component {
+                    if cv.name == "strobe" {
+                        cv.value = intensity;
+                    }
                 }
             }
-        }
-    });
+        });
 }
 
 fn degree_to_16_bit(degree: u32, range: u32) -> u32 {
@@ -383,10 +512,9 @@ fn pan_tilt_sweep(
     }
 }
 
-
 fn hex_to_rgb(hex: &str) -> Result<(u8, u8, u8), std::num::ParseIntError> {
     let r = u8::from_str_radix(&hex[1..3], 16)?;
     let g = u8::from_str_radix(&hex[3..5], 16)?;
     let b = u8::from_str_radix(&hex[5..7], 16)?;
     Ok((r, g, b))
-}   
+}

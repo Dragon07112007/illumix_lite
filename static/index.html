@@ -223,6 +223,11 @@
         <input type="range" id="dimmer-slider-2" min="0" max="255" value="0">
     </div>
 
+    <div class="white">
+        <label for="volume">Global Dimmer</label><br>
+        <input type="range" id="global-dimmer-slider" min="0" max="255" value="255">
+    </div>
+
     <br>
     <div class="white">
         <label for="volume">Gobu 1</label><br>
@@ -282,6 +287,8 @@ const focus_slider_2 = document.getElementById('focus-slider-2');
 //Dimmer Slider
 const dimmer_slider_1 = document.getElementById('dimmer-slider-1');
 const dimmer_slider_2 = document.getElementById('dimmer-slider-2');
+// Global Dimmer Slider
+const global_dimmer_slider = document.getElementById('global-dimmer-slider');
 
 //Gobu Slider
 const gobu_slider_1 = document.getElementById('gobu-slider-1');
@@ -443,6 +450,10 @@ function addCurrentTime() {
     });
     dimmer_slider_2.addEventListener('input', () => {
         sendEvent({ event: "dimmer-2", dimmer_2: parseInt(dimmer_slider_2.value)});
+    });
+
+    global_dimmer_slider.addEventListener('input', () => {
+        sendEvent({ event: "global-dimmer", dimmer: parseInt(global_dimmer_slider.value)});
     });
 
     gobu_slider_1.addEventListener('input', () => {
